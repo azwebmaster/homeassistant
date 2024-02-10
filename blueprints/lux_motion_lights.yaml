@@ -24,6 +24,16 @@ blueprint:
         hours: 0
         minutes: 20
         seconds: 0
+    starttime:
+      name: Motion Start time
+      selector:
+        time:
+      default: "06:00:00"
+    endtime:
+      name: Motion End time
+      selector:
+        time:
+      default: "21:30:00"
 
 trigger:
   - platform: state
@@ -37,8 +47,8 @@ condition:
         entity_id: sensor.home_solar_rad_lx
         below: 20000
       - condition: time
-        after: "06:00:00"
-        before: "21:30:00"
+        after: !input starttime
+        before: !input endtime
 action:
   - service: light.turn_on
     metadata: {}
