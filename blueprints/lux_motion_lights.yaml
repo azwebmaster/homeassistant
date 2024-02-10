@@ -64,6 +64,12 @@ action:
           - !input motion_entity
         from: "on"
         for: !input duration
+      - platform: numeric_state
+        entity_id:
+          - sensor.home_solar_rad_lx
+        above: 30000
+        for:
+          minutes: 5
   - service: light.turn_off
     metadata: {}
     data: {}
