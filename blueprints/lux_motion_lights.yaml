@@ -17,9 +17,13 @@ blueprint:
             - binary_sensor
           device_class: motion
     duration:
-      name: Duration
+      name: Motion Duration
       selector:
         duration:
+          default:
+            hours: 0
+            minutes: 20
+            seconds: 0
 
 trigger:
   - platform: state
