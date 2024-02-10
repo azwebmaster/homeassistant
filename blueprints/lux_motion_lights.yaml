@@ -61,8 +61,8 @@ action:
   - wait_for_trigger:
       - platform: state
         entity_id:
-          - binary_sensor.living_room_motion_motion
-        to: "off"
+          - !input motion_entity
+        from: "on"
         for: !input duration
   - service: light.turn_off
     metadata: {}
