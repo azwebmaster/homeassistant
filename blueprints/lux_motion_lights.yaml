@@ -54,6 +54,10 @@ action:
     metadata: {}
     data: {}
     target: !input light_target
+  - service: switch.turn_on
+    metadata: {}
+    data: {}
+    target: !input light_target
   - wait_for_trigger:
       - platform: state
         entity_id:
