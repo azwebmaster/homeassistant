@@ -1,0 +1,59 @@
+blueprint:
+  name: Link Switch
+  description: Toggle other switches when a switch is turned on or off.
+  domain: automation
+  author: Dan Clayton
+
+  input:
+    linked_switches:
+      name: Linked Switches
+      selector:
+        target:
+    source_switch:
+      name: Source Switch
+      selector:
+        entity:
+          domain:
+            - light
+            - switch
+
+trigger:
+  - id: turned_on
+    platform: state
+    entity_id:
+      - !input source_switch
+    to: "on"
+  - id: turned_off
+    platform: state
+    entity_id:
+      - !input source_switch
+    to: "off"
+action:
+  - choose:
+    - conditions:
+        - condition: trigger
+          id:
+            - turned_on
+      sequence:
+        - service: switch.turn_on
+          metadata: {}
+          data: {}
+          target: !input linked_switches
+        - service: light.turn_on
+          metadata: {}
+          data: {}
+          target: !input linked_switches
+    - conditions:
+        - condition: trigger
+          id:
+            - turned_off
+      sequence:
+        - service: switch.turn_off
+          metadata: {}
+          data: {}
+          target: !input linked_switches
+        - service: light.turn_off
+          metadata: {}
+          data: {}
+          target: !input linked_switches
+mode: single
