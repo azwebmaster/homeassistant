@@ -55,15 +55,17 @@ variables:
   lights: !input "light_target"
 
 condition:
-  - "{{ expand(lights.entity_id) | selectattr('state', '==', 'on') | list | count > 0 }}" # some lights in the group are on
-  - condition: and
+  - condition: or
     conditions:
-      - condition: numeric_state
-        entity_id: sensor.home_solar_rad_lx
-        below: !input brightness
-      - condition: time
-        after: !input starttime
-        before: !input endtime
+    - "{{ expand(lights.entity_id) | selectattr('state', '==', 'on') | list | count > 0 }}" # some lights in the group are on
+    - condition: and
+      conditions:
+        - condition: numeric_state
+          entity_id: sensor.home_solar_rad_lx
+          below: !input brightness
+        - condition: time
+          after: !input starttime
+          before: !input endtime
 
 action:
   - service: light.turn_on
