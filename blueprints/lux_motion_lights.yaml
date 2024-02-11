@@ -34,21 +34,37 @@ blueprint:
       selector:
         time:
       default: "21:30:00"
+    brightness:
+      name: Maximum brightness
+      description: Brightness trigger level. If it gets any brighter the lights will not be turned on.
+      default: 20000
+      selector:
+        number:
+          min: 0
+          max: 80000
+          unit_of_measurement: lx
 
 trigger:
   - platform: state
     entity_id:
       - !input motion_entity
     to: "on"
+
+# making the input variable usable in the condition
+variables:
+  lights: !input "light_target"
+
 condition:
+  - "{{ expand(lights.entity_id) | selectattr('state', '==', 'on') | list | count > 0 }}" # some lights in the group are on
   - condition: and
     conditions:
       - condition: numeric_state
         entity_id: sensor.home_solar_rad_lx
-        below: 20000
+        below: !input brightness
       - condition: time
         after: !input starttime
         before: !input endtime
+
 action:
   - service: light.turn_on
     metadata: {}
@@ -67,9 +83,13 @@ action:
       - platform: numeric_state
         entity_id:
           - sensor.home_solar_rad_lx
-        above: 30000
+        above: !input brightness
         for:
           minutes: 5
+      - platform: template
+        value_template: >-
+          {{ expand(lights.entity_id) | selectattr('state', '==', 'on') | list |
+          count == 0 }}
   - service: light.turn_off
     metadata: {}
     data: {}
