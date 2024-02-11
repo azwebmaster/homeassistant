@@ -9,6 +9,9 @@ blueprint:
       name: Lights
       selector:
         target:
+          domain:
+            - light
+            - switch
     motion_entity:
       name: Motion Sensor
       selector:
@@ -42,7 +45,7 @@ blueprint:
         number:
           min: 0
           max: 80000
-          unit_of_measurement: lx
+          unit_of_measurement: lux
 
 trigger:
   - platform: state
@@ -55,17 +58,17 @@ variables:
   lights: !input "light_target"
 
 condition:
-  - condition: or
+  # - condition: or
+  #   conditions:
+  #   - "{{ expand(lights.entity_id) | selectattr('state', '==', 'on') | list | count > 0 }}" # some lights in the group are on
+  - condition: and
     conditions:
-    - "{{ expand(lights.entity_id) | selectattr('state', '==', 'on') | list | count > 0 }}" # some lights in the group are on
-    - condition: and
-      conditions:
-        - condition: numeric_state
-          entity_id: sensor.home_solar_rad_lx
-          below: !input brightness
-        - condition: time
-          after: !input starttime
-          before: !input endtime
+      - condition: numeric_state
+        entity_id: sensor.home_solar_rad_lx
+        below: !input brightness
+      - condition: time
+        after: !input starttime
+        before: !input endtime
 
 action:
   - service: light.turn_on
