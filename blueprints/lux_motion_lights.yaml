@@ -9,9 +9,10 @@ blueprint:
       name: Lights
       selector:
         target:
-          domain:
-            - light
-            - switch
+          entity:
+            domain:
+              - light
+              - switch
     motion_entity:
       name: Motion Sensor
       selector:
