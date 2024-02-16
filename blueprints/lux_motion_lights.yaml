@@ -38,6 +38,11 @@ blueprint:
       selector:
         time:
       default: "21:30:00"
+    brightness_entity:
+      name: Lux/Brightness Sensor
+      selector:
+        entity:
+          device_class: illuminance
     brightness:
       name: Maximum brightness
       description: Brightness trigger level. If it gets any brighter the lights will not be turned on.
@@ -52,6 +57,7 @@ trigger:
   - platform: state
     entity_id:
       - !input motion_entity
+    from: "off"
     to: "on"
 
 # making the input variable usable in the condition
@@ -59,45 +65,29 @@ variables:
   lights: !input "light_target"
 
 condition:
-  # - condition: or
-  #   conditions:
-  #   - "{{ expand(lights.entity_id) | selectattr('state', '==', 'on') | list | count > 0 }}" # some lights in the group are on
   - condition: and
     conditions:
-      - condition: numeric_state
-        entity_id: sensor.home_solar_rad_lx
-        below: !input brightness
       - condition: time
         after: !input starttime
         before: !input endtime
+      - condition: or
+        conditions:
+          - "{{ expand(lights.entity_id) | selectattr('state', '==', 'on') | list | count > 0 }}" # some lights in the group are on
+          - condition: numeric_state
+            entity_id: !input brightness_entity
+            below: !input brightness
+
+mode: restart
+max_exceeded: silent
 
 action:
   - service: light.turn_on
-    metadata: {}
-    data: {}
-    target: !input light_target
-  - service: switch.turn_on
-    metadata: {}
-    data: {}
     target: !input light_target
   - wait_for_trigger:
-      - platform: state
-        entity_id:
-          - !input motion_entity
-        from: "on"
-        for: !input duration
-      - platform: numeric_state
-        entity_id:
-          - sensor.home_solar_rad_lx
-        above: !input brightness
-        for:
-          minutes: 5
-      - platform: template
-        value_template: >-
-          {{ expand(lights.entity_id) | selectattr('state', '==', 'on') | list |
-          count == 0 }}
+      platform: state
+      entity_id: !input motion_entity
+      from: "on"
+      to: "off"
+  - delay: !input duration
   - service: light.turn_off
-    metadata: {}
-    data: {}
     target: !input light_target
-mode: single
