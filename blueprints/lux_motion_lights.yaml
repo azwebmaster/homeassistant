@@ -65,24 +65,24 @@ variables:
   lights: !input "light_target"
 
 condition:
-  - condition: and
+  - condition: or
     conditions:
-      - condition: time
-        after: !input starttime
-        before: !input endtime
-      - condition: or
-        conditions:
-          - "{{ expand(lights.entity_id) | selectattr('state', '==', 'on') | list | count > 0 }}" # some lights in the group are on
-          - condition: numeric_state
-            entity_id: !input brightness_entity
-            below: !input brightness
+      - "{{ expand(lights.entity_id) | selectattr('state', '==', 'on') | list | count > 0 }}" # some lights in the group are on
+      - condition: numeric_state
+        entity_id: !input brightness_entity
+        below: !input brightness
 
 mode: restart
 max_exceeded: silent
 
 action:
-  - service: light.turn_on
-    target: !input light_target
+  - if:
+    - condition: time
+      after: !input starttime
+      before: !input endtime
+    then:
+    - service: light.turn_on
+      target: !input light_target
   - wait_for_trigger:
       platform: state
       entity_id: !input motion_entity
